@@ -1,4 +1,4 @@
-# MMM-SE-ResRobot
+# MMM-ResRobot
 
 A module for MagicMirror2 (https://github.com/MichMich/MagicMirror) which shows scheduled departures from public transport stop(s) in Sweden. The module
 uses the ResRobot API for which you do need to obtain an API key, see below.
