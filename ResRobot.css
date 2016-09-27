@@ -1,0 +1,26 @@
+.ResRobot {
+  font-size: 75%;
+  line-height: 65px;
+  display: inline-block;
+  -ms-transform: translate(0, -3px); /* IE 9 */
+  -webkit-transform: translate(0, -3px); /* Safari */
+  transform: translate(0, -3px);
+}
+
+.ResRobot table {
+    width: 400px;
+}
+
+.departuretime {
+    width: 20%;
+    align: left;
+}
+
+.lineno {
+    width: 20%;
+    align: right;
+}
+
+.destination {
+    align: left;
+}
