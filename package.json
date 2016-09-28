@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Alvinger/MMM-ResRobot#readme",
   "dependencies": {
-    "moment": "latest"
+	"unirest": "latest",
+	"unirest": "moment"
   }
 }
