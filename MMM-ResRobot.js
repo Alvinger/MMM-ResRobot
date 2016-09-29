@@ -49,9 +49,8 @@ Module.register("MMM-ResRobot",{
 	},
 
 	socketNotificationReceived: function(notification, payload) {
-		console.log(this.name + " received a socket notification: " + notification + " - Payload: " + payload);
+		Log.log(this.name + " received a socket notification: " + notification + " - Payload: " + payload);
 		if (notification === "DEPARTURES") {
-			console.log("Departures notification received");
 			this.departures = payload;
 			this.loaded = true;
 			this.updateDom();
@@ -60,7 +59,6 @@ Module.register("MMM-ResRobot",{
 
 	// Override dom generator.
 	getDom: function() {
-		console.log("getDom: ");	// DEBUG
 		var wrapper = document.createElement("div");
 
 		if (this.config.from === "") {
@@ -70,7 +68,6 @@ Module.register("MMM-ResRobot",{
 		}
 
 		if (!this.loaded) {
-			console.log("DEBUG: ");	// DEBUG
 			wrapper.innerHTML = "Fetching departures ...";
 			wrapper.className = "dimmed light small";
 			return wrapper;
@@ -84,9 +81,6 @@ Module.register("MMM-ResRobot",{
 				break;
 			}
 			var departure = this.departures[d];
-
-			console.log("Departure no: " + d);
-			console.log(departure.departuretime + " " + departure.line + " " + departure.to);
 
 			var row = document.createElement("tr");
 			table.appendChild(row);

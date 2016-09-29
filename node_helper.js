@@ -60,7 +60,7 @@ module.exports = NodeHelper.create({
 				if (r.error) {
 					console.log(self.name + " : " + r.error);
 				} else {
-					console.log("body: ", JSON.stringify(r.body));
+					// console.log("body: ", JSON.stringify(r.body));
 					self.processDepartures(r.body);
 				}
 			});
@@ -88,28 +88,26 @@ module.exports = NodeHelper.create({
 	 * argument data object - Departure information received from ResRobot.
 	 */
 	processDepartures: function(data) {
-		console.log("processDepartures: " + this.name);	// DEBUG
 		var now = moment();
 
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
 			var departureTime = moment(departure.date + " " + departure.time);
 			var waitingTime = moment.duration(departureTime.diff(now));
+			var departureTo = departure.direction;
+			if (departureTo.indexOf(" ",5) > 0)  {
+				departureTo = departureTo.substring(0, departureTo.indexOf(" ",5));
+			}
 			if (waitingTime > 0) {
-				console.log("timestamp: " + departureTime);
-				console.log("departuretime: " + departureTime.format("HH:mm"));
-				console.log("line: " + departure.transportNumber);
-				console.log("to: " + departure.direction);
 				this.departures.push({
 					timestamp: departureTime,	// Departure timestamp, used for sorting
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
 					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
 					line: departure.transportNumber,	// Line number/name of departure
-					to: departure.direction	// Destination/Direction
+					to: departureTo	// Destination/Direction
 				});
 			}
 		}
-		console.log("Number of departures: " + this.departures.length);
 
 		// Sort the departures and schedule an update for the first departure
 		// If no departures, use standard update interval

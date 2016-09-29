@@ -15,9 +15,9 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 		position: "left",
 		header: "Departures",
 		config: {
-			stationID: "",	// Station ID (or an array of stationIDs)
-			destinationID: "",	// ID of terminating station
-			maximumEntries: "6",	// Number of departures to show
+			from: "",	// ResRobot Station ID (or a comma-separated string of IDs)
+			to: "",	// ResRobot Station ID of destination (or a comma-separated string of IDs)
+			maximumEntries: "6",	// Number of departures to show on screen
 			apiKey: ""	// Your ResRobot apiKey
         }
     },
