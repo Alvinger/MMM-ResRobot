@@ -95,9 +95,13 @@ module.exports = NodeHelper.create({
 			var departureTime = moment(departure.date + " " + departure.time);
 			var waitingTime = moment.duration(departureTime.diff(now));
 			var departureTo = departure.direction;
-			if (departureTo.indexOf(" ",5) > 0)  {
-				departureTo = departureTo.substring(0, departureTo.indexOf(" ",5));
+			// If truncation is requested, truncate ending station at first word break after n characters
+			if (this.config.truncateAfter > 0) {
+				if (departureTo.indexOf(" ",this.config.truncateAfter) > 0)  {
+					departureTo = departureTo.substring(0, departureTo.indexOf(" ",this.config.truncateAfter));
+				}
 			}
+			// Only save departures that occurs in the future (silently skip the past ones)
 			if (waitingTime > 0) {
 				this.departures.push({
 					timestamp: departureTime,	// Departure timestamp, used for sorting
