@@ -11,7 +11,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 4. Add the module to the MagicMirror config
 ```
 	{
-		module: "ResRobot",
+		module: "MMM-ResRobot",
 		position: "left",
 		header: "Departures",
 		config: {
