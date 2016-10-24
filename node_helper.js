@@ -122,7 +122,8 @@ module.exports = NodeHelper.create({
  		});
 
 		if (typeof this.departures[0] !== "undefined" && this.departures.length > 0) {
-			var delay = this.departures[0].timestamp - now;
+			// Set delay to the lowest of time until next departure and one hour
+			var delay = Math.min(this.departures[0].timestamp - now, 60 * 60 * 1000);
 			this.scheduleUpdate(delay);
 		} else {
 			this.scheduleUpdate();
