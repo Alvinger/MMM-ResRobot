@@ -59,6 +59,7 @@ module.exports = NodeHelper.create({
 			.end(function (r) {
 				if (r.error) {
 					console.log(self.name + " : " + r.error);
+					self.scheduleUpdate();
 				} else {
 					// console.log("body: ", JSON.stringify(r.body));
 					self.processDepartures(r.body);
