@@ -3,7 +3,7 @@
 /* Magic Mirror
  * Module: MMM-ResRobot
  *
- * By Benjamin Angst http://www.beny.ch
+ * By Johan Alvinger https://github.com/Alvinger
  * based on a script by Benjamin Angst http://www.beny.ch which is
  * based on a script from Michael Teeuw http://michaelteeuw.nl
  * MIT Licensed.
@@ -22,7 +22,14 @@ Module.register("MMM-ResRobot",{
 		from: "740020749",	// Starting station ID (or array) from ResRobot, default: Stockholm Central Station (Metro)
 		to: "",	// Destination station ID (or array) from ResRobot, default: none
 		maximumEntries: 6,	// Total Maximum Entries to show
-		truncateAfter: 5	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
+		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
+		iconTable: {
+			"B": "fa fa-bus",
+			"S": "fa fa-subway",
+			"J": "fa fa-train",
+			"U": "fa fa-subway",
+			"F": "fa fa-ship",
+		},
 	},
 
 	// Define required styles.
@@ -82,6 +89,7 @@ Module.register("MMM-ResRobot",{
 				break;
 			}
 			var departure = this.departures[d];
+console.log(JSON.stringify(departure));
 
 			var row = document.createElement("tr");
 			table.appendChild(row);
@@ -90,6 +98,13 @@ Module.register("MMM-ResRobot",{
 			depTimeCell.className = "departuretime";
 			depTimeCell.innerHTML = departure.departuretime;
 			row.appendChild(depTimeCell);
+
+			var depTypeCell = document.createElement("td");
+			depTypeCell.className = "linetype";
+			var typeSymbol = document.createElement("span");
+			typeSymbol.className = this.config.iconTable[departure.type.substring(0,1)];
+			depTypeCell.appendChild(typeSymbol);
+			row.appendChild(depTypeCell);
 
 			var depLineCell = document.createElement("td");
 			depLineCell.className = "lineno";

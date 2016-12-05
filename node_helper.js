@@ -96,6 +96,7 @@ module.exports = NodeHelper.create({
 			var departureTime = moment(departure.date + " " + departure.time);
 			var waitingTime = moment.duration(departureTime.diff(now));
 			var departureTo = departure.direction;
+			var departureType = departure.Product.catOutS;
 			// If truncation is requested, truncate ending station at first word break after n characters
 			if (this.config.truncateAfter > 0) {
 				if (departureTo.indexOf(" ",this.config.truncateAfter) > 0)  {
@@ -109,6 +110,7 @@ module.exports = NodeHelper.create({
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
 					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
 					line: departure.transportNumber,	// Line number/name of departure
+					type: departureType,	// Short category code for departure
 					to: departureTo	// Destination/Direction
 				});
 			}
