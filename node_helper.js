@@ -104,7 +104,7 @@ module.exports = NodeHelper.create({
 				}
 			}
 			// Only save departures that occurs in the future (silently skip the past ones)
-			if (waitingTime > 0) {
+			if (waitingTime.get("minutes") > this.config.skipMinutes) {
 				this.departures.push({
 					timestamp: departureTime,	// Departure timestamp, used for sorting
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
@@ -126,7 +126,7 @@ module.exports = NodeHelper.create({
 
 		if (typeof this.departures[0] !== "undefined" && this.departures.length > 0) {
 			// Set delay to the lowest of time until next departure and one hour
-			var delay = Math.min(this.departures[0].timestamp - now, 60 * 60 * 1000);
+			var delay = Math.min(this.departures[0].timestamp - now - (this.config.skipMinutes * 60 * 1000), 60 * 60 * 1000);
 			this.scheduleUpdate(delay);
 		} else {
 			this.scheduleUpdate();
