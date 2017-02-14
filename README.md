@@ -17,7 +17,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 		config: {
 			from: "",		// ResRobot Station ID (or a comma-separated string of IDs)
 			to: "",			// ResRobot Station ID of destination (or a comma-separated string of IDs)
-			skipMinutes: 0,		// Skip departures that happen in the next <value> minutes.
+			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
 			maximumEntries: 6,	// Number of departures to show on screen
 			truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
 			apiKey: ""		// Your ResRobot apiKey

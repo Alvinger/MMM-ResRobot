@@ -35,7 +35,7 @@ module.exports = NodeHelper.create({
 
 	/* updateTimetable()
 	 * Requests new departure data from ResRobot.
-	 * Calls processDepartures on succesful response.
+	 * Calls processDepartures on successful response.
 	 */
 	updateTimetable: function() {
 		var self = this;
@@ -106,12 +106,12 @@ module.exports = NodeHelper.create({
 			// Only save departures that occurs in the future (silently skip the past ones)
 			if (waitingTime.get("minutes") > this.config.skipMinutes) {
 				this.departures.push({
-					timestamp: departureTime,	// Departure timestamp, used for sorting
+					timestamp: departureTime,			// Departure timestamp, used for sorting
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
 					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
-					line: departure.transportNumber,	// Line number/name of departure
-					type: departureType,	// Short category code for departure
-					to: departureTo	// Destination/Direction
+					line: departure.transportNumber,		// Line number/name of departure
+					type: departureType,				// Short category code for departure
+					to: departureTo					// Destination/Direction
 				});
 			}
 		}

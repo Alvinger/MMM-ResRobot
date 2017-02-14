@@ -20,7 +20,7 @@ Module.register("MMM-ResRobot",{
 		apiBase: "https://api.resrobot.se/v2/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
 		from: "740020749",	// Starting station ID (or array) from ResRobot, default: Stockholm Central Station (Metro)
-		to: "",	// Destination station ID (or array) from ResRobot, default: none
+		to: "",			// Destination station ID (or array) from ResRobot, default: none
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Total Maximum Entries to show
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
