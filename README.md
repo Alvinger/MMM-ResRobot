@@ -7,7 +7,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 
 1. Clone repository into `../modules/` inside your MagicMirror folder.
 2. Run `npm install` inside `../modules/MMM-ResRobot/` folder
-3. Find your Station ID at https://www.trafiklab.se/api/resrobot-reseplanerare/konsol. Select "Location Lookup" as Method and type your station name in "Location Name".
+3. Find your Station ID at https://www.trafiklab.se/node/14049/console. Select "Location Lookup" as Method and type your station name in "Location Name".
 4. Add the module to the MagicMirror config
 ```
 	{
@@ -15,6 +15,10 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 		position: "left",
 		header: "Departures",
 		config: {
+			transportTypes: [ //transports to include in listing, if left out then all are included
+				"bus","regional-train","express-train", "commuter-train",  
+				"express-bus", "subway", "tram", "ferry"
+			], 
 			from: "",		// ResRobot Station ID (or a comma-separated string of IDs)
 			to: "",			// ResRobot Station ID of destination (or a comma-separated string of IDs)
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
@@ -26,6 +30,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 ```
 # Get API key
 
-You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot - Pole Schedules 2". Registration is free but required.
+You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot - Pole Schedules 2".
+Get it at https://www.trafiklab.se/api/resrobot-stolptidtabeller-2. Registration is free but required.
 
 
