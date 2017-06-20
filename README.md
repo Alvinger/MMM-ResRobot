@@ -15,6 +15,10 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 		position: "left",
 		header: "Departures",
 		config: {
+			transportTypes: [ //transports to include in listing, if left out then all are included
+				"bus","regional-train","express-train", "commuter-train",  
+				"express-bus", "subway", "tram", "ferry"
+			], 
 			from: "",		// ResRobot Station ID (or a comma-separated string of IDs)
 			to: "",			// ResRobot Station ID of destination (or a comma-separated string of IDs)
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.

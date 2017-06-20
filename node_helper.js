@@ -1,5 +1,4 @@
 /* Resrobot - Timetable for ResRobot Module */
-
 /* Magic Mirror
  * Module: MMM-ResRobot
  *
@@ -14,10 +13,10 @@ const moment = require("moment");
 
 module.exports = NodeHelper.create({
 
+
 	// Define start sequence.
 	start: function() {
 		console.log("Starting node_helper for module: " + this.name);
-
 		// Set locale.
 		moment.locale(config.language);
 		this.started = false;
@@ -57,6 +56,7 @@ module.exports = NodeHelper.create({
 			unirest.get(url)
 			.send()
 			.end(function (r) {
+
 				if (r.error) {
 					console.log(self.name + " : " + r.error);
 					self.scheduleUpdate();
@@ -79,9 +79,21 @@ module.exports = NodeHelper.create({
 		if (this.config.maximumEntries !== "") {
 			url += "&maxJourneys=" + this.config.maximumEntries;
 		}
-
+		var productsCode = this.getProductsCode();
+		if(productsCode > 1 && productsCode < 511){
+			url += "&products=" + productsCode; 
+		}
+		
 		return url;
 	},
+
+	getProductsCode: function(){
+		return this.config.transportTypes.reduce(function(acc, type){
+			var ttValue = this.config.transportTypesMap[type];
+			return ttValue ? acc + ttValue : acc;
+		}.bind(this), 0);
+	},
+
 
 	/* processDepartures(data)
 	 * Uses the received data to set the various values.
@@ -90,7 +102,6 @@ module.exports = NodeHelper.create({
 	 */
 	processDepartures: function(data) {
 		var now = moment();
-
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
 			var departureTime = moment(departure.date + " " + departure.time);
@@ -125,13 +136,13 @@ module.exports = NodeHelper.create({
  		});
 
 		if (typeof this.departures[0] !== "undefined" && this.departures.length > 0) {
+
 			// Set delay to the lowest of time until next departure and one hour
 			var delay = Math.min(this.departures[0].timestamp - now - (this.config.skipMinutes * 60 * 1000), 60 * 60 * 1000);
 			this.scheduleUpdate(delay);
 		} else {
 			this.scheduleUpdate();
 		}
-
 		// Tell the main module that we have a new list of departures
 		this.sendSocketNotification("DEPARTURES", this.departures);
 	},

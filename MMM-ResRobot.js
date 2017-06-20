@@ -24,6 +24,27 @@ Module.register("MMM-ResRobot",{
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Total Maximum Entries to show
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
+		transportTypesMap: {
+                        "express-train": 2,
+                        "regional-train": 4,
+                        "express-bus": 8,
+                        "commuter-train": 16,
+                        "subway": 32,
+                        "tram": 64,
+                        "bus": 128,
+                        "ferry": 256
+                },
+		//Defaults to all available
+		transportTypes: [
+			"express-train",
+			"regional-train",
+			"express-bus",
+			"commuter-train",
+			"subway",
+			"tram",
+			"bus",
+			"ferry"
+		],
 		iconTable: {
 			"B": "fa fa-bus",
 			"S": "fa fa-subway",
