@@ -11,13 +11,11 @@
 const NodeHelper = require("node_helper");
 const unirest = require("unirest");
 const moment = require("moment");
-
 module.exports = NodeHelper.create({
 
 	// Define start sequence.
 	start: function() {
 		console.log("Starting node_helper for module: " + this.name);
-
 		// Set locale.
 		moment.locale(config.language);
 		this.started = false;
@@ -25,46 +23,68 @@ module.exports = NodeHelper.create({
 
 	// Receive notification
 	socketNotificationReceived: function(notification, payload) {
-   		console.log("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + payload);
+   		console.log("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + JSON.stringify(payload));
 		if (notification === "CONFIG" && this.started == false) {
 			this.config = payload;
 			this.started = true;
-			this.scheduleUpdate(this.config.initialLoadDelay);
+			this.updateTimetable();
 		}
 	},
 
 	/* updateTimetable()
-	 * Requests new departure data from ResRobot.
-	 * Calls processDepartures on successful response.
+	 * Requests new departure data from ResRobot (if no cached data is current).
 	 */
 	updateTimetable: function() {
 		var self = this;
+		var now = moment();
 
-		// Reset all departures
-		this.departures = [];
-
-		// Save list of froms and tos in arrays
-		var destfrom = this.config.from.split(",");
-		var destto   = this.config.to.split(",");
-
-		// Process each from and to pair
-		for (var d in destfrom) {
-			// Get current list of departures between from and to
-			var url = this.getURL() + "&id=" + destfrom[d];
-			if (typeof destto[d] === "string" && destto[d] !== "") {
-				url += "&direction=" + destto[d];
+		// Save all all departures that are still current (Departure time being (now + skipMinutes) or after)
+		var currentDepartures = [];
+		for (d in this.departures) {
+			var departureTime = moment(this.departures[d].timestamp);
+			if (departureTime.isSameOrAfter(now.add(moment.duration(config.skipMinutes, 'minutes')))) {
+				currentDepartures.push(this.departures[d]);
 			}
-			unirest.get(url)
-			.send()
-			.end(function (r) {
-				if (r.error) {
-					console.log(self.name + " : " + r.error);
-					self.scheduleUpdate();
-				} else {
-					// console.log("body: ", JSON.stringify(r.body));
-					self.processDepartures(r.body);
+		}
+
+		// If there are still more than CONFIG.MAXIMUMENTRIES left, keep on displaying them
+		if (currentDepartures.length > this.config.maximumEntries) {
+			console.log('Reusing ' + currentDepartures.length + ' cached departure(s) for module: ' + this.name);
+			this.departures = currentDepartures;
+		} else {
+		// Otherwise, get new departures
+			console.log('Fetching new departure data for module: ' + this.name);
+		// Clear departure list
+		// Process each route (from and to pair)
+			this.departures = [];
+			for (d in this.config.routes) {
+				// Get current list of departures between from and to
+				var url = this.getURL() + "&id=" + this.config.routes[d].from;
+				if (typeof this.config.routes[d].to === "string" && this.config.routes[d].to !== "") {
+					url += "&direction=" + this.config.routes[d].to;
 				}
-			});
+				unirest.get(url)
+				.send()
+				.end(function (r) {
+					if (r.error) {
+						console.log(self.name + " : " + r.error);
+						self.scheduleUpdate();
+					} else {
+						// console.log("body: ", JSON.stringify(r.body));
+						self.processDepartures(r.body);
+					}
+				});
+			}
+		}
+		// Notify the main module that we have a list of departures
+		// Schedule update to coincide with the first upcoming departure (- skipMinutes) but never later than 1 hour from now.
+		if (this.departures.length > 0) {
+			this.sendSocketNotification("DEPARTURES", this.departures);
+			nextUpdate = this.departures[0].timestamp - now - (this.config.skipMinutes * 60 * 1000);
+			nextUpdate = Math.min(nextUpdate,(60 * 60 * 1000));
+			this.scheduleUpdate(nextUpdate);
+		} else {
+			this.scheduleUpdate();
 		}
 	},
 
@@ -76,10 +96,9 @@ module.exports = NodeHelper.create({
 	getURL: function() {
 		var url = this.config.apiBase;
 		url +="&key=" + this.config.apiKey;
-		if (this.config.maximumEntries !== "") {
-			url += "&maxJourneys=" + this.config.maximumEntries;
-		}
-
+//		if (this.config.maximumEntries !== "") {
+//			url += "&maxJourneys=" + this.config.maximumEntries;
+//		}
 		return url;
 	},
 
@@ -90,10 +109,9 @@ module.exports = NodeHelper.create({
 	 */
 	processDepartures: function(data) {
 		var now = moment();
-
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
-			var departureTime = moment(departure.date + " " + departure.time);
+			var departureTime = moment(departure.date + "T" + departure.time);
 			var waitingTime = moment.duration(departureTime.diff(now));
 			var departureTo = departure.direction;
 			var departureType = departure.Product.catOutS;
@@ -103,8 +121,7 @@ module.exports = NodeHelper.create({
 					departureTo = departureTo.substring(0, departureTo.indexOf(" ",this.config.truncateAfter));
 				}
 			}
-			// Only save departures that occurs in the future (silently skip the past ones)
-			if (waitingTime.get("minutes") > this.config.skipMinutes) {
+			if (departureTime.isSameOrAfter(now.add(moment.duration(config.skipMinutes, 'minutes')))) {
 				this.departures.push({
 					timestamp: departureTime,			// Departure timestamp, used for sorting
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
@@ -116,24 +133,12 @@ module.exports = NodeHelper.create({
 			}
 		}
 
-		// Sort the departures and schedule an update for the first departure
-		// If no departures, use standard update interval
+		// Sort the departures in the order in which they occur timewise
 		this.departures.sort(function(a, b) {
 			if (a.timestamp < b.timestamp) return -1;
 			if (a.timestamp > b.timestamp) return 1;
 			return 0;
  		});
-
-		if (typeof this.departures[0] !== "undefined" && this.departures.length > 0) {
-			// Set delay to the lowest of time until next departure and one hour
-			var delay = Math.min(this.departures[0].timestamp - now - (this.config.skipMinutes * 60 * 1000), 60 * 60 * 1000);
-			this.scheduleUpdate(delay);
-		} else {
-			this.scheduleUpdate();
-		}
-
-		// Tell the main module that we have a new list of departures
-		this.sendSocketNotification("DEPARTURES", this.departures);
 	},
 
 	/* scheduleUpdate()

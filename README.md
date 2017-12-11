@@ -15,8 +15,10 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 		position: "left",
 		header: "Departures",
 		config: {
-			from: "",		// ResRobot Station ID (or a comma-separated string of IDs)
-			to: "",			// ResRobot Station ID of destination (or a comma-separated string of IDs)
+			routes: [
+				from: "", to: "",	// ResRobot Station IDs of starting and destination station(s). At least one route must be defined.
+				from: "", to: "",	// "from" is required but "to" is optional (set "to" to empty string to indicate all destinations)
+			]
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
 			maximumEntries: 6,	// Number of departures to show on screen
 			truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
@@ -27,5 +29,3 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 # Get API key
 
 You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot - Pole Schedules 2". Registration is free but required.
-
-

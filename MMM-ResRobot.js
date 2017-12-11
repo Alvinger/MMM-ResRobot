@@ -12,17 +12,19 @@ Module.register("MMM-ResRobot",{
 
 	// Define module defaults
 	defaults: {
-		updateInterval: 5 * 50 * 1000,	// Update every 5 minutes.
+		updateInterval: 30 * 1000,	// Update module every 30 seconds.
 		animationSpeed: 2000,
 		fade: true,
 		fadePoint: 0.25,	// Start on 1/4th of the list.
-		initialLoadDelay: 0,	// start delay seconds.
 		apiBase: "https://api.resrobot.se/v2/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
-		from: "740020749",	// Starting station ID (or array) from ResRobot, default: Stockholm Central Station (Metro)
-		to: "",			// Destination station ID (or array) from ResRobot, default: none
+		routes: [
+			{from: "740020749", to: ""},
+			],
+					// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
+					// and a destination station ID from ResRobot, default: none
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
-		maximumEntries: 6,	// Total Maximum Entries to show
+		maximumEntries: 6,	// Maximum Entries to show on screen
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
 		iconTable: {
 			"B": "fa fa-bus",
@@ -48,12 +50,11 @@ Module.register("MMM-ResRobot",{
 		Log.info("Starting module: " + this.name);
 
 		// Set locale.
-		moment.locale(config.language);
+		moment.locale(this.config.language);
 
 		this.departures = [];
 		this.loaded = false;
 		this.sendSocketNotification("CONFIG", this.config);
-		this.scheduleUpdate(this.config.initialLoadDelay);
 		this.updateTimer = null;
 	},
 
@@ -70,8 +71,8 @@ Module.register("MMM-ResRobot",{
 	getDom: function() {
 		var wrapper = document.createElement("div");
 
-		if (this.config.from === "") {
-			wrapper.innerHTML = "Please set the correct Departure-Station name: " + this.name + ".";
+		if (this.config.routes === "") {
+			wrapper.innerHTML = "Please set at least one route to watch name: " + this.name + ".";
 			wrapper.className = "dimmed light small";
 			return wrapper;
 		}
