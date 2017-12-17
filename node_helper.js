@@ -37,12 +37,13 @@ module.exports = NodeHelper.create({
 	updateTimetable: function() {
 		var self = this;
 		var now = moment();
+		var cutoff = now.add(moment.duration(this.config.skipMinutes, "minutes"));
 
-		// Save all all departures that are still current (Departure time being (now + skipMinutes) or after)
+		// Save all all departures that are still current (Departure time being after cutoff time
 		var currentDepartures = [];
 		for (d in this.departures) {
 			var departureTime = moment(this.departures[d].timestamp);
-			if (departureTime.isSameOrAfter(now.add(moment.duration(config.skipMinutes, 'minutes')))) {
+			if (departureTime.isAfter(cutoff)) {
 				currentDepartures.push(this.departures[d]);
 			}
 		}
@@ -51,6 +52,7 @@ module.exports = NodeHelper.create({
 		if (currentDepartures.length > this.config.maximumEntries) {
 			console.log('Reusing ' + currentDepartures.length + ' cached departure(s) for module: ' + this.name);
 			this.departures = currentDepartures;
+			this.displayAndSchedule(this.departures);
 		} else {
 		// Otherwise, get new departures
 			console.log('Fetching new departure data for module: ' + this.name);
@@ -75,16 +77,6 @@ module.exports = NodeHelper.create({
 					}
 				});
 			}
-		}
-		// Notify the main module that we have a list of departures
-		// Schedule update to coincide with the first upcoming departure (- skipMinutes) but never later than 1 hour from now.
-		if (this.departures.length > 0) {
-			this.sendSocketNotification("DEPARTURES", this.departures);
-			nextUpdate = this.departures[0].timestamp - now - (this.config.skipMinutes * 60 * 1000);
-			nextUpdate = Math.min(nextUpdate,(60 * 60 * 1000));
-			this.scheduleUpdate(nextUpdate);
-		} else {
-			this.scheduleUpdate();
 		}
 	},
 
@@ -139,6 +131,27 @@ module.exports = NodeHelper.create({
 			if (a.timestamp > b.timestamp) return 1;
 			return 0;
  		});
+		this.displayAndSchedule(this.departures);
+	},
+	/* displayAndSchedule(departures)
+	 * Send a notification to refresh display.
+	 *
+	 * argument dep object - Departures to send in notification.
+	 */
+	displayAndSchedule: function(dep) {
+
+		// Notify the main module that we have a list of departures
+		// Schedule update to coincide with the first upcoming departure (- skipMinutes)
+		// Time between updates should never be more than 1 hour and never less than 5 minutes
+		if (dep.length > 0) {
+			this.sendSocketNotification("DEPARTURES", dep);
+			nextUpdate = this.departures[0].timestamp - moment().add(moment.duration(this.config.skipMinutes, "minutes"));
+			nextUpdate = Math.min(nextUpdate,(60 * 60 * 1000));
+			nextUpdate = Math.max(nextUpdate,(5 * 60 * 1000));
+			this.scheduleUpdate(nextUpdate);
+		} else {
+			this.scheduleUpdate();
+		}
 	},
 
 	/* scheduleUpdate()

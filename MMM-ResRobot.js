@@ -19,10 +19,8 @@ Module.register("MMM-ResRobot",{
 		apiBase: "https://api.resrobot.se/v2/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
 		routes: [
-			{from: "740020749", to: ""},
-			],
-					// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
-					// and a destination station ID from ResRobot, default: none
+			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
+		],					// and a destination station ID from ResRobot, default: none
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Maximum Entries to show on screen
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
@@ -55,7 +53,6 @@ Module.register("MMM-ResRobot",{
 		this.departures = [];
 		this.loaded = false;
 		this.sendSocketNotification("CONFIG", this.config);
-		this.updateTimer = null;
 	},
 
 	socketNotificationReceived: function(notification, payload) {
@@ -63,7 +60,7 @@ Module.register("MMM-ResRobot",{
 		if (notification === "DEPARTURES") {
 			this.departures = payload;
 			this.loaded = true;
-			this.updateDom();
+			this.scheduleUpdate(0);
 		}
 	},
 
@@ -86,11 +83,15 @@ Module.register("MMM-ResRobot",{
 		var table = document.createElement("table");
 		table.className = "small";
 
+		var cutoff = moment().add(moment.duration(this.config.skipMinutes, "minutes"));
 		for (var d in this.departures) {
 			if (d >= this.config.maximumEntries) {
 				break;
 			}
 			var departure = this.departures[d];
+			if (moment(departure.timestamp).isBefore(cutoff)) {
+				continue;
+			}
 
 			var row = document.createElement("tr");
 			table.appendChild(row);
@@ -119,7 +120,7 @@ Module.register("MMM-ResRobot",{
 
 			if (this.config.fade && this.config.fadePoint < 1) {
 				if (this.config.fadePoint < 0) {
-					this.config.fadePoint = 0;
+ 					this.config.fadePoint = 0;
 				}
 				var startingPoint = this.config.maximumEntries * this.config.fadePoint;
 				var steps = this.departures.length - startingPoint;
@@ -145,7 +146,7 @@ Module.register("MMM-ResRobot",{
 
 		var self = this;
 		clearTimeout(this.updateTimer);
-		this.updateTimer = setTimeout(function() {
+		this.updateTimer = setInterval(function() {
 			self.updateDom();
 		}, nextLoad);
 	},
