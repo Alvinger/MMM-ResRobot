@@ -12,7 +12,7 @@ Module.register("MMM-ResRobot",{
 
 	// Define module defaults
 	defaults: {
-		updateInterval: 30 * 1000,	// Update module every 30 seconds.
+		updateInterval: 5 * 60 * 1000,	// Update module every 5 minutes.
 		animationSpeed: 2000,
 		fade: true,
 		fadePoint: 0.25,	// Start on 1/4th of the list.
@@ -138,10 +138,10 @@ Module.register("MMM-ResRobot",{
 	/* scheduleUpdate()
 	 * Schedule next update.
 	 *
-	 * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
+	 * argument delay number - Milliseconds before next update. If empty, 30 seconds is used.
 	 */
 	scheduleUpdate: function(delay) {
-		var nextLoad = this.config.updateInterval;
+		var nextLoad = 30000;
 		if (typeof delay !== "undefined" && delay >= 0) {
 			nextLoad = delay;
 		}
