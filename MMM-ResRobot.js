@@ -84,14 +84,16 @@ Module.register("MMM-ResRobot",{
 		table.className = "small";
 
 		var cutoff = moment().add(moment.duration(this.config.skipMinutes, "minutes"));
+		var n = 0;
 		for (var d in this.departures) {
-			if (d >= this.config.maximumEntries) {
+			if (n >= this.config.maximumEntries) {
 				break;
 			}
 			var departure = this.departures[d];
 			if (moment(departure.timestamp).isBefore(cutoff)) {
 				continue;
 			}
+			n++;
 
 			var row = document.createElement("tr");
 			table.appendChild(row);

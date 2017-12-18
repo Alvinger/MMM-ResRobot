@@ -39,7 +39,7 @@ module.exports = NodeHelper.create({
 		var now = moment();
 		var cutoff = now.add(moment.duration(this.config.skipMinutes, "minutes"));
 
-		// Save all all departures that are still current (Departure time being after cutoff time
+		// Save all all departures that are still current (Departure time being after cutoff time)
 		var currentDepartures = [];
 		for (d in this.departures) {
 			var departureTime = moment(this.departures[d].timestamp);
@@ -56,9 +56,9 @@ module.exports = NodeHelper.create({
 		} else {
 		// Otherwise, get new departures
 			console.log('Fetching new departure data for module: ' + this.name);
-		// Clear departure list
-		// Process each route (from and to pair)
+			// Clear departure list
 			this.departures = [];
+			// Process each route (from and to pair)
 			for (d in this.config.routes) {
 				// Get current list of departures between from and to
 				var url = this.getURL() + "&id=" + this.config.routes[d].from;
@@ -142,12 +142,12 @@ module.exports = NodeHelper.create({
 
 		// Notify the main module that we have a list of departures
 		// Schedule update to coincide with the first upcoming departure (- skipMinutes)
-		// Time between updates should never be more than 1 hour and never less than 5 minutes
+		// Time between updates should never be more than 1 hour and never less than [update interval]
 		if (dep.length > 0) {
 			this.sendSocketNotification("DEPARTURES", dep);
 			nextUpdate = this.departures[0].timestamp - moment().add(moment.duration(this.config.skipMinutes, "minutes"));
 			nextUpdate = Math.min(nextUpdate,(60 * 60 * 1000));
-			nextUpdate = Math.max(nextUpdate,(5 * 60 * 1000));
+			nextUpdate = Math.max(nextUpdate,this.config.updateInterval);
 			this.scheduleUpdate(nextUpdate);
 		} else {
 			this.scheduleUpdate();
