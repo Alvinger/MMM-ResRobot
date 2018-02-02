@@ -9,7 +9,7 @@
  * MIT Licensed.
  */
 const NodeHelper = require("node_helper");
-const unirest = require("unirest");
+const fetch = require("node-fetch");
 const moment = require("moment");
 module.exports = NodeHelper.create({
 
@@ -65,16 +65,15 @@ module.exports = NodeHelper.create({
 				if (typeof this.config.routes[d].to === "string" && this.config.routes[d].to !== "") {
 					url += "&direction=" + this.config.routes[d].to;
 				}
-				unirest.get(url)
-				.send()
-				.end(function (r) {
-					if (r.error) {
-						console.log(self.name + " : " + r.error);
-						self.scheduleUpdate();
-					} else {
-						// console.log("body: ", JSON.stringify(r.body));
-						self.processDepartures(r.body);
-					}
+				fetch(url)
+				.then(function(res) {
+					return res.json();
+				}).then(function(json) {
+					self.processDepartures(json);
+				})
+				.catch(function(err) {
+					console.log(self.name + " : " + err);
+					self.scheduleUpdate();
 				});
 			}
 		}
@@ -100,6 +99,7 @@ module.exports = NodeHelper.create({
 	 * argument data object - Departure information received from ResRobot.
 	 */
 	processDepartures: function(data) {
+//		console.log("data: ", JSON.stringify(data));
 		var now = moment();
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
