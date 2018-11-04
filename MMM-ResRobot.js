@@ -60,7 +60,7 @@ Module.register("MMM-ResRobot",{
 		if (notification === "DEPARTURES") {
 			this.departures = payload;
 			this.loaded = true;
-			this.scheduleUpdate(0);
+			this.updateDom();
 		}
 	},
 
@@ -79,6 +79,8 @@ Module.register("MMM-ResRobot",{
 			wrapper.className = "dimmed light small";
 			return wrapper;
 		}
+
+		wrapper.className = "ResRobot";
 
 		var table = document.createElement("table");
 		table.className = "small";
@@ -133,23 +135,7 @@ Module.register("MMM-ResRobot",{
 			}
 
 		}
-		return table;
-	},
-	/* scheduleUpdate()
-	 * Schedule next update.
-	 *
-	 * argument delay number - Milliseconds before next update. If empty, 30 seconds is used.
-	 */
-	scheduleUpdate: function(delay) {
-		var nextLoad = 30000;
-		if (typeof delay !== "undefined" && delay >= 0) {
-			nextLoad = delay;
-		}
-
-		var self = this;
-		clearTimeout(this.updateTimer);
-		this.updateTimer = setInterval(function() {
-			self.updateDom();
-		}, nextLoad);
+		wrapper.appendChild(table);
+		return wrapper;
 	},
 });
