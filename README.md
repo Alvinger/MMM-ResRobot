@@ -18,6 +18,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 			routes: [
 				{from: "", to: ""},	// ResRobot Station IDs of starting and destination station(s). At least one route must be defined.
 				{from: "", to: ""},	// "from" is required but "to" is optional (set "to" to empty string to indicate all destinations)
+				{from: "", to: "", lable: ""} Add a label to change the destination text (to use lable "to" must be specified).
 			],
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
 			maximumEntries: 6,	// Number of departures to show on screen

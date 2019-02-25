@@ -19,7 +19,7 @@ Module.register("MMM-ResRobot",{
 		apiBase: "https://api.resrobot.se/v2/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
 		routes: [
-			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
+			{from: "740020749", to: "", lable: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
 		],					// and a destination station ID from ResRobot, default: none
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Maximum Entries to show on screen
@@ -30,7 +30,7 @@ Module.register("MMM-ResRobot",{
 			"J": "fa fa-train",
 			"U": "fa fa-subway",
 			"F": "fa fa-ship",
-		},
+		}
 	},
 
 	// Define required styles.
@@ -60,7 +60,7 @@ Module.register("MMM-ResRobot",{
 		if (notification === "DEPARTURES") {
 			this.departures = payload;
 			this.loaded = true;
-			this.scheduleUpdate(0);
+			this.scheduleUpdate();
 		}
 	},
 
@@ -117,7 +117,18 @@ Module.register("MMM-ResRobot",{
 
 			var depToCell = document.createElement("td");
 			depToCell.className = "to";
-			depToCell.innerHTML = departure.to;
+
+			for(let i = 0; i < this.config.routes.length; i++){
+				if(this.config.routes[i].to == undefined || this.config.routes[i].lable == undefined){
+					depToCell.innerHTML = departure.to;
+				}else{
+					if(this.config.routes[i].from == departure.startDestinationId && this.config.routes[i].to == departure.stopDestinationId){	
+						depToCell.innerHTML = this.config.routes[i].lable;
+					}
+				}
+			}
+			
+			
 			row.appendChild(depToCell);
 
 			if (this.config.fade && this.config.fadePoint < 1) {

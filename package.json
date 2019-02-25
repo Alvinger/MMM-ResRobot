@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/Alvinger/MMM-ResRobot#readme",
   "dependencies": {
-	"node-fetch": "latest"
+    "node-fetch": "latest"
   }
 }

@@ -66,12 +66,13 @@ module.exports = NodeHelper.create({
 					url += "&direction=" + this.config.routes[d].to;
 				}
 				fetch(url)
-				.then(function(res) {
-					return res.json();
-				}).then(function(json) {
+				.then(r =>  {return r.json().then(data => ({
+						url: r.url, 
+						body: data
+					}))})
+				.then(function(json){
 					self.processDepartures(json);
-				})
-				.catch(function(err) {
+				}).catch(function(err) {
 					console.log(self.name + " : " + err);
 					self.scheduleUpdate();
 				});
@@ -101,12 +102,15 @@ module.exports = NodeHelper.create({
 	processDepartures: function(data) {
 //		console.log("data: ", JSON.stringify(data));
 		var now = moment();
-		for (var i in data.Departure) {
-			var departure = data.Departure[i];
+		
+		for (var i in data.body.Departure) {
+			var departure = data.body.Departure[i];
 			var departureTime = moment(departure.date + "T" + departure.time);
 			var waitingTime = moment.duration(departureTime.diff(now));
 			var departureTo = departure.direction;
 			var departureType = departure.Product.catOutS;
+			var startId = departure.stopid;
+			var stopId = data.url.substring(data.url.lastIndexOf("=")+1, data.url.length);
 			// If truncation is requested, truncate ending station at first word break after n characters
 			if (this.config.truncateAfter > 0) {
 				if (departureTo.indexOf(" ",this.config.truncateAfter) > 0)  {
@@ -120,7 +124,9 @@ module.exports = NodeHelper.create({
 					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
 					line: departure.transportNumber,		// Line number/name of departure
 					type: departureType,				// Short category code for departure
-					to: departureTo					// Destination/Direction
+					to: departureTo,					// Destination/Direction
+					startDestinationId: startId,
+					stopDestinationId: stopId
 				});
 			}
 		}
