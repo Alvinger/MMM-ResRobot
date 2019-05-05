@@ -29,6 +29,12 @@
     padding-right: 10px;
 }
 
+.trackno {
+    width: 20%;
+    align: right;
+    padding-right: 10px;
+}
+
 .destination {
     align: left;
 }
