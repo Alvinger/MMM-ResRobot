@@ -22,6 +22,7 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
 			maximumEntries: 6,	// Number of departures to show on screen
 			truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
+			hideTrack: false,       // if you get a lot of 'undefined' in the list set this to "true"
 			apiKey: ""		// Your ResRobot apiKey
         }
     },
