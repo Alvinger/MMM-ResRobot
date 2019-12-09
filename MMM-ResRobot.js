@@ -117,7 +117,7 @@ Module.register("MMM-ResRobot",{
 
 			var depLineCell = document.createElement("td");
 			depLineCell.className = "trackno";
-			depLineCell.innerHTML = departure.track;
+			depLineCell.innerHTML = departure.track || " ";
 			row.appendChild(depLineCell);
 
 			var depToCell = document.createElement("td");
