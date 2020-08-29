@@ -24,12 +24,20 @@ Module.register("MMM-ResRobot",{
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Maximum Entries to show on screen
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
+		coloredIcons: false,	// Setting this to true will color departure icons according to colors in colorTable
 		iconTable: {
 			"B": "fa fa-bus",
 			"S": "fa fa-subway",
 			"J": "fa fa-train",
 			"U": "fa fa-subway",
 			"F": "fa fa-ship",
+		},
+		colorTable: {
+			"B": "#DA4439",
+			"S": "#019CD5",
+			"J": "#FDB813",
+			"U": "#019CD5",
+			"F": "#444400",
 		},
 	},
 
@@ -106,7 +114,10 @@ Module.register("MMM-ResRobot",{
 			var depTypeCell = document.createElement("td");
 			depTypeCell.className = "linetype";
 			var typeSymbol = document.createElement("span");
-			typeSymbol.className = this.config.iconTable[departure.type.substring(0,1)];
+			typeSymbol.className = this.config.iconTable[departure.type.charAt(0)];
+			if (this.config.coloredIcons) {
+				typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type.charAt(0)]);
+			}
 			depTypeCell.appendChild(typeSymbol);
 			row.appendChild(depTypeCell);
 
