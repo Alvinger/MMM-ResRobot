@@ -23,84 +23,103 @@ module.exports = NodeHelper.create({
 
 	// Receive notification
 	socketNotificationReceived: function(notification, payload) {
-   		console.log("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + JSON.stringify(payload));
+   		console.log("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + JSON.stringify(payload, null, 2));
 		if (notification === "CONFIG" && this.started == false) {
 			this.config = payload;
 			this.started = true;
-			this.updateTimetable();
+			this.departures = [];
+			this.updateDepartures();
 		}
 	},
 
-	/* updateTimetable()
-	 * Requests new departure data from ResRobot (if no cached data is current).
+	/* updateDepartures()
+	 * Check current departures and remove old ones. Requests new departure data if needed.
 	 */
-	updateTimetable: function() {
+	updateDepartures: function() {
 		var self = this;
 		var now = moment();
-		var cutoff = now.add(moment.duration(this.config.skipMinutes, "minutes"));
+		var cutoff = now.clone().add(moment.duration(this.config.skipMinutes, "minutes"));
 
-		// Save all all departures that are still current (Departure time being after cutoff time)
-		var currentDepartures = [];
-		for (d in this.departures) {
-			var departureTime = moment(this.departures[d].timestamp);
+		// Sort current departures by routeId and departure time (descending)
+		this.departures.sort(function(a, b) {
+			if (a.routeId < b.routeId) return -1;
+			if (a.routeId > b.routeId) return 1;
+			if (a.timestamp < b.timestamp) return 1;
+			if (a.timestamp > b.timestamp) return -1;
+			return 0;
+ 		});
+
+		// Loop through current departures (by route) and skip old ones
+		var routeId = "";
+		var departures = [];
+		for (var d in this.departures) {
+			var dep = this.departures[d];
+			// New route, save id and initialize departures for the route
+			if (dep.routeId !== routeId) {
+				routeId = dep.routeId;
+				departures[routeId] = [];
+			}
+			// Only keep departures if they occur after current time + minutes to skip
+			// If old departure is found then we clear all saved departures for that route
+			var departureTime = moment(dep.timestamp);
 			if (departureTime.isAfter(cutoff)) {
-				currentDepartures.push(this.departures[d]);
+				departures[routeId].push(dep);
+			} else {
+				departures[routeId] = [];
 			}
 		}
 
-		// If there are still more than CONFIG.MAXIMUMENTRIES left, keep on displaying them
-		if (currentDepartures.length > this.config.maximumEntries) {
-			console.log('Reusing ' + currentDepartures.length + ' cached departure(s) for module: ' + this.name);
-			this.departures = currentDepartures;
-			this.displayAndSchedule(this.departures);
-		} else {
-		// Otherwise, get new departures
-			console.log('Fetching new departure data for module: ' + this.name);
-			// Clear departure list
-			this.departures = [];
-			// Process each route (from and to pair)
-			for (d in this.config.routes) {
+		// Clear departure list
+		this.departures = [];
+		// Loop through all routes in config
+		// If a route is missing departures, get departures for the route
+		// If a route has departures, save them to output
+		var getRoutes = [];
+		for (var routeId in this.config.routes) {
+			if (typeof departures[routeId] == 'undefined' || departures[routeId].length == 0) {
 				// Get current list of departures between from and to
-				var url = this.getURL() + "&id=" + this.config.routes[d].from;
-				if (typeof this.config.routes[d].to === "string" && this.config.routes[d].to !== "") {
-					url += "&direction=" + this.config.routes[d].to;
+				var params = { "id": this.config.routes[routeId].from };
+				if (typeof this.config.routes[routeId].to == "string" && this.config.routes[routeId].to !== "") {
+					params["direction"] = this.config.routes[routeId].to;
 				}
-				fetch(url)
-				.then(function(res) {
-					return res.json();
-				}).then(function(json) {
-					self.processDepartures(json);
-				})
-				.catch(function(err) {
-					console.log(self.name + " : " + err);
-					self.scheduleUpdate();
-				});
+				var url = this.createURL(params);
+				getRoutes.push({"routeId": routeId, "url": url});
+			} else {
+				for (d in departures[routeId]) {
+					this.departures.push(departures[routeId][d]);
+				}
 			}
+		}
+		// Array getRoutes contains id and url for each route that we need to retrieve departures for
+		if (getRoutes.length == 0) {
+			// Output departures and schedule update
+			this.sendDepartures();
+		} else {
+			var getRouteDepartures = getRoutes.map( (r) => {
+				return (async () => {
+					const response = await fetch(r.url);
+					const json = await response.json();
+					json.routeId = r.routeId;
+					self.saveDepartures(json);
+					return json;
+				})();
+			})
+
+			Promise.all(getRouteDepartures)
+			.then( () => {
+				self.sendDepartures();
+			});
 		}
 	},
 
-	/* getURL()
-	 * Generates a base url with api parameters based on the config.
-	 *
-	 * return String - URL.
-	 */
-	getURL: function() {
-		var url = this.config.apiBase;
-		url +="&key=" + this.config.apiKey;
-//		if (this.config.maximumEntries !== "") {
-//			url += "&maxJourneys=" + this.config.maximumEntries;
-//		}
-		return url;
-	},
-
-	/* processDepartures(data)
+	/* saveDepartures(data, routeId)
 	 * Uses the received data to set the various values.
 	 *
-	 * argument data object - Departure information received from ResRobot.
+	 * argument data object - departure data in JSON format
 	 */
-	processDepartures: function(data) {
-//		console.log("data: ", JSON.stringify(data));
+	saveDepartures: function(data) {
 		var now = moment();
+		var routeId = data.routeId;
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
 			var departureTime = moment(departure.date + "T" + departure.time);
@@ -113,46 +132,55 @@ module.exports = NodeHelper.create({
 					departureTo = departureTo.substring(0, departureTo.indexOf(" ",this.config.truncateAfter));
 				}
 			}
-			if (departureTime.isSameOrAfter(now.add(moment.duration(config.skipMinutes, 'minutes')))) {
+			if (departureTime.isSameOrAfter(now.clone().add(moment.duration(config.skipMinutes, 'minutes')))) {
 				this.departures.push({
+					routeId: routeId,				// Id for route, used for sorting
 					timestamp: departureTime,			// Departure timestamp, used for sorting
 					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
 					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
 					line: departure.transportNumber,		// Line number/name of departure
-					track: departure.rtTrack,				// Track number/name of departure
+					track: departure.rtTrack,			// Track number/name of departure
 					type: departureType,				// Short category code for departure
 					to: departureTo					// Destination/Direction
 				});
 			}
 		}
-
-		// Sort the departures in the order in which they occur timewise
-		this.departures.sort(function(a, b) {
-			if (a.timestamp < b.timestamp) return -1;
-			if (a.timestamp > b.timestamp) return 1;
-			return 0;
- 		});
-		this.displayAndSchedule(this.departures);
 	},
-	/* displayAndSchedule(departures)
-	 * Send a notification to refresh display.
-	 *
-	 * argument dep object - Departures to send in notification.
+	/* sendDepartures()
+	 * Output departures notification and schedule next update.
 	 */
-	displayAndSchedule: function(dep) {
-
+	sendDepartures: function() {
 		// Notify the main module that we have a list of departures
-		// Schedule update to coincide with the first upcoming departure (- skipMinutes)
-		// Time between updates should never be more than 1 hour and never less than [update interval]
-		if (dep.length > 0) {
-			this.sendSocketNotification("DEPARTURES", dep);
-			nextUpdate = this.departures[0].timestamp - moment().add(moment.duration(this.config.skipMinutes, "minutes"));
-			nextUpdate = Math.min(nextUpdate,(60 * 60 * 1000));
-			nextUpdate = Math.max(nextUpdate,this.config.updateInterval);
-			this.scheduleUpdate(nextUpdate);
-		} else {
-			this.scheduleUpdate();
+		// Schedule update
+		if (this.departures.length > 0) {
+			// Sort departures by ascending time
+			this.departures.sort(function(a, b) {
+				if (a.timestamp < b.timestamp) return -1;
+				if (a.timestamp > b.timestamp) return 1;
+				return 0;
+ 			});
+			this.sendSocketNotification("DEPARTURES", this.departures);
 		}
+		this.scheduleUpdate();
+	},
+
+	/* createURL()
+	 * Generates a base url with api parameters based on the config.
+	 *
+	 * argument params object - an array of key: value pairs to add to url
+	 *
+	 * return String - URL.
+	 */
+	createURL: function(params) {
+		var url = this.config.apiBase;
+		url +="&key=" + encodeURIComponent(this.config.apiKey);
+		if (this.config.maximumEntries !== "") {
+			url += "&maxJourneys=" + encodeURIComponent(this.config.maximumEntries);
+		}
+		for (var key in params) {
+			url += "&" + encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+		}
+		return url;
 	},
 
 	/* scheduleUpdate()
@@ -169,7 +197,7 @@ module.exports = NodeHelper.create({
 
 		clearTimeout(this.updateTimer);
 		this.updateTimer = setTimeout(function() {
-			self.updateTimetable();
+			self.updateDepartures();
 		}, nextLoad);
 	}
 });
