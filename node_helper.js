@@ -135,7 +135,7 @@ module.exports = NodeHelper.create({
 			}
 			// If truncation of line number is requested, truncate line number after n characters
 			if (this.config.truncateLineAfter > 0) {
-				departureTo = departureTransportNumber.substring(0, this.config.truncateLineAfter);
+				departureTransportNumber = departureTransportNumber.substring(0, this.config.truncateLineAfter);
 			}
 			// Save dparture (if it is after now + skipMinutes)
 			if (departureTime.isSameOrAfter(now.clone().add(moment.duration(config.skipMinutes, 'minutes')))) {
