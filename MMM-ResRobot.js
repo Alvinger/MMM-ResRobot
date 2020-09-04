@@ -24,6 +24,7 @@ Module.register("MMM-ResRobot",{
 		skipMinutes: 0,		// Number of minutes to skip before showing departures
 		maximumEntries: 6,	// Maximum Entries to show on screen
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
+		truncateLineAfter: 5,	// A value > 0 will truncate the line number after <value> characters. Default: 5
 		coloredIcons: false,	// Setting this to true will color departure icons according to colors in colorTable
 		iconTable: {
 			"B": "fa fa-bus",
