@@ -86,6 +86,9 @@ module.exports = NodeHelper.create({
 				getRoutes.push({"routeId": routeId, "url": url});
 			} else {
 				for (d in departures[routeId]) {
+					// Recalculate waitingTime
+					departures[routeId][d].waitingTime = moment(departures[routeId][d].timestamp).diff(now, "minutes");
+console.log("WaitingTime: " + departures[routeId][d].waitingTime);
 					this.departures.push(departures[routeId][d]);
 				}
 			}
@@ -123,7 +126,7 @@ module.exports = NodeHelper.create({
 		for (var i in data.Departure) {
 			var departure = data.Departure[i];
 			var departureTime = moment(departure.date + "T" + departure.time);
-			var waitingTime = moment.duration(departureTime.diff(now));
+			var waitingTime = departureTime.diff(now, "minutes");
 			var departureTransportNumber = departure.transportNumber;
 			var departureTo = departure.direction;
 			var departureType = departure.Product.catOutS;
@@ -142,8 +145,8 @@ module.exports = NodeHelper.create({
 				this.departures.push({
 					routeId: routeId,				// Id for route, used for sorting
 					timestamp: departureTime,			// Departure timestamp, used for sorting
-					departuretime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
-					waitingtime: waitingTime.get("minutes"),	// Time until departure, in minutes
+					departureTime: departureTime.format("HH:mm"),	// Departure time in HH:mm, used for display
+					waitingTime: waitingTime,			// Relative time until departure (formatted by moment)
 					line: departureTransportNumber,			// Line number/name of departure
 					track: departure.rtTrack,			// Track number/name of departure
 					type: departureType,				// Short category code for departure

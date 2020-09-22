@@ -21,10 +21,12 @@ Module.register("MMM-ResRobot",{
 		routes: [
 			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
 		],					// and a destination station ID from ResRobot, default: none
-		skipMinutes: 0,		// Number of minutes to skip before showing departures
-		maximumEntries: 6,	// Maximum Entries to show on screen
-		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. Default: 5
-		truncateLineAfter: 5,	// A value > 0 will truncate the line number after <value> characters. Default: 5
+		skipMinutes: 0,		// Skip entries that depart with the next <value> minutes
+		maximumEntries: 6,	// Maximum number of departures to display
+		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
+		truncateLineAfter: 5,	// A value > 0 will truncate the line number after <value> characters. 0 = no truncation
+		showTrack: true,	// If true, track number will be displayed
+		getRelative: 0,		// Show relative rather than absolute time when less than <value> minutes left to departure, 0 = stay absolute
 		coloredIcons: false,	// Setting this to true will color departure icons according to colors in colorTable
 		iconTable: {
 			"B": "fa fa-bus",
@@ -51,6 +53,14 @@ Module.register("MMM-ResRobot",{
 	getScripts: function() {
 		return ["moment.js"];
 	},
+
+        // Define required translations.
+        getTranslations: function() {
+                return {
+                        en: "translations/en.json",
+                        sv: "translations/sv.json",
+                };
+        },
 
 	// Define start sequence.
 	start: function() {
@@ -109,7 +119,14 @@ Module.register("MMM-ResRobot",{
 
 			var depTimeCell = document.createElement("td");
 			depTimeCell.className = "departuretime";
-			depTimeCell.innerHTML = departure.departuretime;
+			depTimeCell.innerHTML = departure.departureTime;
+			if (departure.waitingTime < this.config.getRelative) {
+				if (departure.waitingTime > 1) {
+					depTimeCell.innerHTML = departure.waitingTime + " " + this.translate("MINUTES_SHORT");
+				} else {
+					depTimeCell.innerHTML = this.translate("NOW");
+				}
+			}
 			row.appendChild(depTimeCell);
 
 			var depTypeCell = document.createElement("td");
@@ -127,10 +144,12 @@ Module.register("MMM-ResRobot",{
 			depLineCell.innerHTML = departure.line;
 			row.appendChild(depLineCell);
 
-			var depLineCell = document.createElement("td");
-			depLineCell.className = "trackno";
-			depLineCell.innerHTML = departure.track || " ";
-			row.appendChild(depLineCell);
+			if (this.config.showTrack) {
+				var depTrackCell = document.createElement("td");
+				depTrackCell.className = "trackno";
+				depTrackCell.innerHTML = departure.track || " ";
+				row.appendChild(depTrackCell);
+			}
 
 			var depToCell = document.createElement("td");
 			depToCell.className = "to";

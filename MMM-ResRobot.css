@@ -12,25 +12,25 @@
 }
 
 .departuretime {
-    width: 25%;
+    width: 20%;
     align: left;
-    padding-right: 20px;
+    padding-right: 10px;
 }
 
 .departuretype {
-    width: 20%;
+    width: 10%;
     align: right;
-    padding-right: 20px;
+    padding-right: 10px;
 }
 
 .lineno {
-    width: 20%;
+    width: 15%;
     align: right;
     padding-right: 10px;
 }
 
 .trackno {
-    width: 20%;
+    width: 10%;
     align: right;
     padding-right: 10px;
 }
