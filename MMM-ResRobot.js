@@ -12,7 +12,7 @@ Module.register("MMM-ResRobot",{
 
 	// Define module defaults
 	defaults: {
-		updateInterval: 5 * 60 * 1000,	// Update module every 5 minutes.
+		updateInterval: 1 * 60 * 1000,	// Update module every minute.
 		animationSpeed: 2000,
 		fade: true,
 		fadePoint: 0.25,	// Start on 1/4th of the list.
