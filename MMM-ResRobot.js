@@ -134,7 +134,11 @@ Module.register("MMM-ResRobot",{
 			var typeSymbol = document.createElement("span");
 			typeSymbol.className = this.config.iconTable[departure.type.charAt(0)];
 			if (this.config.coloredIcons) {
-				typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type.charAt(0)]);
+				if (this.config.colorTable[departure.type]) {
+					typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type]);
+                                } else {
+					typeSymbol.setAttribute("style", "color:" + this.config.colorTable[departure.type.charAt(0)]);
+				}
 			}
 			depTypeCell.appendChild(typeSymbol);
 			row.appendChild(depTypeCell);
