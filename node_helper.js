@@ -8,6 +8,7 @@
  * based on a script from Michael Teeuw http://michaelteeuw.nl
  * MIT Licensed.
  */
+const Log = require("../../js/logger.js");
 const NodeHelper = require("node_helper");
 const fetch = require("node-fetch");
 const moment = require("moment");
@@ -15,7 +16,7 @@ module.exports = NodeHelper.create({
 
 	// Define start sequence.
 	start: function() {
-		console.log("Starting node_helper for module: " + this.name);
+		Log.info("Starting node_helper for module: " + this.name);
 		// Set locale.
 		moment.locale(config.language);
 		this.started = false;
@@ -23,7 +24,7 @@ module.exports = NodeHelper.create({
 
 	// Receive notification
 	socketNotificationReceived: function(notification, payload) {
-   		console.log("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + JSON.stringify(payload, null, 2));
+   		Log.info("node_helper for " + this.name + " received a socket notification: " + notification + " - Payload: " + JSON.stringify(payload, null, 2));
 		if (notification === "CONFIG" && this.started == false) {
 			this.config = payload;
 			this.started = true;
@@ -88,7 +89,7 @@ module.exports = NodeHelper.create({
 				for (d in departures[routeId]) {
 					// Recalculate waitingTime
 					departures[routeId][d].waitingTime = moment(departures[routeId][d].timestamp).diff(now, "minutes");
-console.log("WaitingTime: " + departures[routeId][d].waitingTime);
+					Log.debug("WaitingTime: " + departures[routeId][d].waitingTime);
 					this.departures.push(departures[routeId][d]);
 				}
 			}
