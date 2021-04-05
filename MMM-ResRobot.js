@@ -69,9 +69,7 @@ Module.register("MMM-ResRobot",{
 		// Set locale.
 		moment.locale(this.config.language);
 
-		this.departures = [];
-		this.loaded = false;
-		this.sendSocketNotification("CONFIG", this.config);
+		this.initConfig;
 	},
 
 	socketNotificationReceived: function(notification, payload) {
@@ -81,6 +79,13 @@ Module.register("MMM-ResRobot",{
 			this.loaded = true;
 			this.scheduleUpdate(0);
 		}
+	},
+
+	// Init config
+	initConfig: function() {
+		this.departures = [];
+		this.loaded = false;
+		this.sendSocketNotification("CONFIG", this.config);
 	},
 
 	// Override dom generator.
@@ -172,6 +177,10 @@ Module.register("MMM-ResRobot",{
 				}
 			}
 
+		}
+		if (n === 0) {
+			// No departures found so resend config
+			this.initConfig;
 		}
 		return table;
 	},
