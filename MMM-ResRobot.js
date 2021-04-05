@@ -69,7 +69,7 @@ Module.register("MMM-ResRobot",{
 		// Set locale.
 		moment.locale(this.config.language);
 
-		this.initConfig;
+		this.initConfig();
 	},
 
 	socketNotificationReceived: function(notification, payload) {
@@ -180,7 +180,7 @@ Module.register("MMM-ResRobot",{
 		}
 		if (n === 0) {
 			// No departures found so resend config
-			this.initConfig;
+			this.initConfig();
 		}
 		return table;
 	},
