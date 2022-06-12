@@ -16,13 +16,14 @@ Module.register("MMM-ResRobot",{
 		animationSpeed: 2000,
 		fade: true,
 		fadePoint: 0.25,	// Start on 1/4th of the list.
-		apiBase: "https://api.resrobot.se/v2/departureBoard?format=json&passlist=0",
+		apiBase: "https://api.resrobot.se/v2.1/departureBoard?format=json&passlist=0",
 		apiKey: "<YOUR RESROBOT API KEY HERE>",
 		routes: [
 			{from: "740020749", to: ""},	// Each route has a starting station ID from ResRobot, default: Stockholm Central Station (Metro)
 		],					// and a destination station ID from ResRobot, default: none
 		skipMinutes: 0,		// Skip entries that depart with the next <value> minutes
 		maximumEntries: 6,	// Maximum number of departures to display
+		maximumDuration: 360,	// Maximum number of minutes to search for departures
 		truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
 		truncateLineAfter: 5,	// A value > 0 will truncate the line number after <value> characters. 0 = no truncation
 		showTrack: true,	// If true, track number will be displayed

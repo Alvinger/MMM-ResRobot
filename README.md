@@ -21,11 +21,12 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 			],
 			skipMinutes: 0,		// Skip departures that happens within the next <value> minutes.
 			maximumEntries: 6,	// Number of departures to show on screen
+			maximumDuration: 360,	// Number of minutes to search for departures
 	                getRelative: 0,         // Show relative rather than absolute time when less than <valute> minutes left to departure, 0 = stay absolute
 			truncateAfter: 5,	// A value > 0 will truncate direction name at first space after <value> characters. 0 = no truncation
 			truncateLineAfter: 5,	// A value > 0 will truncate line number <value> characters. 0 = no truncation
 	                showTrack: true,        // If true, track number will be displayed
-                	coloredIcons: false,    // Setting this to true will color transportation type icons according to colors in colorTable
+			coloredIcons: false,    // Setting this to true will color transportation type icons according to colors in colorTable
 			apiKey: ""		// Your ResRobot apiKey
         }
     },
