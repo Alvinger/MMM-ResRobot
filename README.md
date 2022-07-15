@@ -33,4 +33,5 @@ uses the ResRobot API for which you do need to obtain an API key, see below.
 ```
 # Get API key
 
-You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot - Pole Schedules 2". Registration is free but required.
+You need to obtain your API key here: http://www.trafiklab.se, you want one for API "ResRobot v2.1". If you have a key for 2.0 you need to get a new one.
+Registration is free but required.
