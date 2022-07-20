@@ -128,9 +128,9 @@ module.exports = NodeHelper.create({
 			var departure = data.Departure[i];
 			var departureTime = moment(departure.date + "T" + departure.time);
 			var waitingTime = departureTime.diff(now, "minutes");
-			var departureTransportNumber = departure.transportNumber;
+			var departureTransportNumber = departure.ProductAtStop.num; //departure.transportNumber;
 			var departureTo = departure.direction;
-			var departureType = departure.Product.catOutS;
+			var departureType = departure.ProductAtStop.catOutS; //departure.Product.catOutS;
 			// If truncation is requested, truncate ending station at first word break after n characters
 			if (this.config.truncateAfter > 0) {
 				if (departureTo.indexOf(" ",this.config.truncateAfter) > 0)  {
