@@ -191,15 +191,16 @@ Module.register("MMM-ResRobot",{
 	 * argument delay number - Milliseconds before next update. If empty, 30 seconds is used.
 	 */
 	scheduleUpdate: function(delay) {
-		var nextLoad = 30000;
+		var nextLoad = 10000;
 		if (typeof delay !== "undefined" && delay >= 0) {
 			nextLoad = delay;
 		}
 
 		var self = this;
 		clearTimeout(this.updateTimer);
-		this.updateTimer = setInterval(function() {
+		this.updateTimer = setTimeout(function() {
 			self.updateDom();
+			self.scheduleUpdate(10000);
 		}, nextLoad);
 	},
 });
