@@ -1,14 +1,14 @@
 {
   "name": "MMM-ResRobot",
   "version": "1.0.0",
-  "description": "Local transport in Sweden module for MagicMirror",
+  "description": "Local transport in Sweden module for MagicMirror².",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Alvinger/MMM-ResRobot"
   },
   "keywords": [
     "magic mirror",
-    "smart mirror",
+    "public transport",
     "local transport",
     "module",
     "sweden"
